@@ -66,11 +66,11 @@ Build order: identity → billing, notifications → reporting
 
 **The map is gated like every phase.** The human reviews module boundaries, dependency direction, and build order before any module spec is written. Getting the map wrong is expensive; reviewing ten lines is not.
 
-**Then recurse per module.** Run Specify → Plan → Tasks → Implement for each module in dependency order. Each module gets its own spec, scoped to that module's objective, boundaries, and success criteria. Save the approved map as `SPEC.md` at the project root and each module's spec under `spec/`, named by module id (`spec/identity.md`, `spec/billing.md`). `SPEC.md` then holds the map plus a link to each module spec; the map, not filename guessing, is the index of what exists. These are the locations `/plan` and `/build auto` look for.
+**Then recurse per module.** Run Specify → Plan → Tasks → Implement for each module in dependency order. Each module gets its own spec, scoped to that module's objective, boundaries, and success criteria. Save the approved map as `SPEC.md` at the project root and each module's spec under `spec/`, named by module id (`spec/identity.md`, `spec/billing.md`). `SPEC.md` then holds the map plus a link to each module spec; the map, not filename guessing, is the index of what exists. These are the locations `/plan` and `/build auto` look for. Plan and build each module separately with `/plan <module-id>` and `/build auto <module-id>`, which keep that module's plan in `tasks/<module-id>/`.
 
 ### Phase 1: Specify
 
-Start with a high-level vision. Ask the human clarifying questions until requirements are concrete. If the ask is still underspecified (no clear user, purpose, or "why now"), follow `interview-me` to find the real intent before drafting anything.
+Start with a high-level vision. Ask the human clarifying questions until requirements are concrete. If the ask is still underspecified (no clear user, purpose, or "why now"), follow `interview-me` to find the real intent before drafting anything. If `docs/intent/` or `docs/ideas/` already holds a confirmed intent or idea one-pager for this work, start from it instead of asking the same questions again.
 
 **Surface assumptions immediately.** Before writing any spec content, inspect the repository (existing `CLAUDE.md`/`AGENTS.md`, `CONSTRAINTS.md`, specs, and code) so assumptions rest on evidence, then list what you're assuming:
 
@@ -122,6 +122,8 @@ If an assumption would change scope, behavior, data ownership, or security, wait
 
 ```markdown
 # Spec: [Project/Feature Name]
+
+Status: Draft
 
 ## Objective
 [What we're building, why, and for whom. User stories.]
@@ -179,7 +181,7 @@ This lets you loop, retry, and problem-solve toward a clear goal rather than gue
 **Stop after writing the spec (CRITICAL).** Once the spec is saved:
 
 1. Summarize it and list any Open Questions.
-2. Ask the human to approve it or request changes.
+2. Ask the human to approve it or request changes. The spec stays `Status: Draft` until they do; when they approve in a later turn, change it to `Status: Approved (<who>, <date>)`. `/plan` and `/build auto` refuse a spec that isn't Approved.
 3. **STOP YOUR TURN IMMEDIATELY.** Do NOT start Phase 2, invoke `planning-and-task-breakdown`, or write code in this turn. Planning starts only after the human approves the spec in a later turn.
 
 ### Phase 2: Plan
@@ -268,3 +270,4 @@ Before proceeding to implementation, confirm:
 - [ ] The spec is saved as `SPEC.md` (module specs under `spec/`), or in the project's existing spec system
 - [ ] If the request bundles several independently testable capabilities, a capability map (module ids, dependency direction, build order) was approved before any module spec was written
 - [ ] Every module spec traces to a module id in the approved map
+- [ ] The spec's Status line reads Approved, set only after the human approved it

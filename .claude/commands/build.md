@@ -10,7 +10,7 @@ Invoke the agent-skills:incremental-implementation skill alongside agent-skills:
 - **`/build`** — implement the *next* pending task, then stop (careful, one slice at a time).
 - **`/build auto`** — generate the plan if needed, get a single approval, then implement *every* task without stopping between them.
 
-`$ARGUMENTS` selects the mode. Treat `auto` (canonical) or `all` as autonomous mode; anything else (or empty) is the default single-task mode. Note: autonomous mode is not faster *per task* — it runs the same test-driven loop — it only removes the human stepping *between* tasks.
+`$ARGUMENTS` selects the mode. Treat `auto` (canonical) or `all` as autonomous mode; anything else (or empty) is the default single-task mode. When the spec is a capability map, a module id follows (`/build auto <module-id>`) and selects `spec/<module-id>.md` and `tasks/<module-id>/`. Note: autonomous mode is not faster *per task* — it runs the same test-driven loop — it only removes the human stepping *between* tasks.
 
 ## Default: one task
 
@@ -21,17 +21,21 @@ Pick the next pending task from the plan. Then:
 3. Write a failing test for the expected behavior (RED)
 4. Implement the minimum code to pass the test (GREEN)
 5. Run the full test suite to check for regressions
-6. Run the build to verify compilation
+6. Run the build to verify compilation. If `CONSTRAINTS.md` exists, also run its task-level check (e.g. `check:task`) and the floor guard; a failure blocks the commit
 7. Commit with a descriptive message
 8. Mark the task complete and stop
+
+## Before any commit
+
+Check the current branch. If it is the repository's default branch (usually `main` or `master`), stop and ask whether to create a feature branch first. Commit task work to the default branch only if the user explicitly says to.
 
 ## Autonomous: the whole plan (`/build auto`)
 
 Use this once a spec exists and you want to collapse plan + build into one run. It removes the manual stepping between tasks — **not** the verification. Every task still earns a passing test and its own commit.
 
-1. **Require a spec.** Look only for a spec at a known path: `SPEC.md` at the repo root, `docs/SPEC.md`, or a file under `spec/`. A README or arbitrary doc does **not** count. If none exists, stop and tell the user to run `/spec` first — do not invent requirements.
-2. **Establish a clean baseline.** Run `git status --porcelain`. If there are uncommitted changes outside the expected planning artifacts (`SPEC.md`, `docs/SPEC.md`, `spec/*`, `tasks/plan.md`, `tasks/todo.md`), stop and ask the user to commit, stash, or confirm how to handle them. Autonomous per-task commits must not absorb unrelated local work, or the clean-rollback guarantee breaks.
-3. **Plan if needed.** If there is no `tasks/plan.md`, invoke agent-skills:planning-and-task-breakdown to generate one.
+1. **Require a spec.** Look only for a spec at a known path: `SPEC.md` at the repo root, `docs/SPEC.md`, or a file under `spec/`. A README or arbitrary doc does **not** count. If none exists, stop and tell the user to run `/spec` first — do not invent requirements. The spec must read `Status: Approved`; if it says Draft or has no Status line, stop and ask the human to approve it. If `SPEC.md` is a capability map and no module id was given, ask which module to build.
+2. **Establish a clean baseline.** Run `git status --porcelain`. If there are uncommitted changes outside the expected planning artifacts (`SPEC.md`, `docs/SPEC.md`, `spec/*`, `tasks/plan.md`, `tasks/todo.md`, `tasks/<module-id>/*`), stop and ask the user to commit, stash, or confirm how to handle them. Autonomous per-task commits must not absorb unrelated local work, or the clean-rollback guarantee breaks.
+3. **Plan if needed.** If there is no `tasks/plan.md` (or `tasks/<module-id>/plan.md` for a module), invoke agent-skills:planning-and-task-breakdown to generate one.
 4. **Single checkpoint.** Present the full plan and wait for an unambiguous affirmative (e.g. "approve", "go", "yes"). Treat hedged responses ("looks reasonable", "I guess") as **not** approved. This is the only human gate — after approval, run autonomously. If you generated `tasks/plan.md`, commit it as a single preparatory commit now so it doesn't bleed into the first task's commit.
 5. **Execute every task in dependency order.** Use each task's declared dependencies; if they aren't explicit, execute in the order the plan lists them. For each task, run the full default loop above (RED → GREEN → regression → build → commit → mark complete). Stage only the files that task touched plus its task-status update — never `git add -A` blindly — and make one commit per task so any point is a clean rollback.
 6. **Stop and ask the user** (do not push through) when:

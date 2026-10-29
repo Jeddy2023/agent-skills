@@ -21,9 +21,11 @@ Decompose work into small, verifiable tasks with explicit acceptance criteria. G
 
 ## The Planning Process
 
-### Step 1: Enter Plan Mode
+### Step 1: Work Read-Only
 
-Before writing any code, operate in read-only mode:
+Before writing any code, work read-only. This is a discipline, not Claude Code's plan mode: the plan and task list are the only files you write. If the spec has a `Status:` line that is not Approved, stop and ask the human to approve it first.
+
+Then:
 
 - Read the spec and relevant codebase sections
 - Identify existing patterns and conventions
@@ -111,6 +113,7 @@ Arrange tasks so that:
 2. Each task leaves the system in a working state
 3. Verification checkpoints occur after every 2-3 tasks
 4. High-risk tasks are early (fail fast)
+5. On a greenfield repo, Task 1 is a walking skeleton: dependencies installed, test runner, lint, build, one passing test, CI, and an env template. Every later task depends on it.
 
 Add explicit checkpoints to the task list target:
 
@@ -146,6 +149,8 @@ If a task is L or larger, it should be broken into smaller tasks. An agent perfo
 - **Task list:** Record each task in the **task list target** (defined below).
 
 Create the `tasks/` directory if it does not exist.
+
+**Per-module plans.** When `SPEC.md` is a capability map with module specs under `spec/`, plan one module at a time from `spec/<module-id>.md`, and write its plan and task list to `tasks/<module-id>/plan.md` and `tasks/<module-id>/todo.md` instead of the root files. Each module's plan is then independent, and the overwrite rule below applies per folder.
 
 **Never overwrite an incomplete plan.** Before writing `tasks/plan.md` or `tasks/todo.md`, check whether they already exist and still contain unchecked tasks:
 

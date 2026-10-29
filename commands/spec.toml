@@ -3,7 +3,7 @@ description = "Start spec-driven development — write a structured specificatio
 prompt = """
 Invoke the spec-driven-development skill.
 
-Begin by understanding what the user wants to build. Ask clarifying questions about:
+Begin by understanding what the user wants to build. If docs/intent/ or docs/ideas/ already holds a confirmed intent for this work, start from it. Ask clarifying questions about:
 1. The objective and target users
 2. Core features and acceptance criteria
 3. Tech stack preferences and constraints
@@ -13,5 +13,5 @@ Then generate a structured spec using the skill's template: objective, non-goals
 
 If the request bundles several independently testable capabilities, first propose a capability map (module ids, dependency direction, build order) per the skill's Phase 0 and get it approved, then spec each module in dependency order. Save the map as SPEC.md and each module spec as spec/<module-id>.md.
 
-Save a single-capability spec as SPEC.md in the project root. Then summarize it, list open questions, ask for approval, and stop; do not plan or write code in the same turn.
+Save a single-capability spec as SPEC.md in the project root. Mark it `Status: Draft`. Then summarize it, list open questions, ask for approval, and stop; do not plan or write code in the same turn.
 """
