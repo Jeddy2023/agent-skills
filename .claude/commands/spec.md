@@ -11,8 +11,8 @@ Begin by understanding what the user wants to build. Ask clarifying questions ab
 3. Tech stack preferences and constraints
 4. Known boundaries (what to always do, ask first about, and never do)
 
-Then generate a structured spec covering all six core areas: objective, commands, project structure, code style, testing strategy, and boundaries.
+Then generate a structured spec using the skill's template: objective, non-goals, the six core areas, success criteria, and open questions. Where the project's rules files (CLAUDE.md, AGENTS.md, CONSTRAINTS.md) already define commands, structure, style, testing thresholds, or boundaries, link to them instead of restating them.
 
-If the request bundles several independently testable capabilities, first propose a capability map (module ids, dependency direction, build order) per the skill's Phase 0 and get it approved, then spec each module in dependency order.
+If the request bundles several independently testable capabilities, first propose a capability map (module ids, dependency direction, build order) per the skill's Phase 0 and get it approved, then spec each module in dependency order. Save the map as SPEC.md and each module spec as spec/<module-id>.md.
 
-Save the spec as SPEC.md in the project root and confirm with the user before proceeding.
+Save a single-capability spec as SPEC.md in the project root. Then summarize it, list open questions, ask for approval, and stop; do not plan or write code in the same turn.
