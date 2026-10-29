@@ -55,6 +55,9 @@ For every function or component:
 | Boundary values | Min, max, zero, negative |
 | Error paths | Invalid input, network failure, timeout |
 | Concurrency | Rapid repeated calls, out-of-order responses |
+| Duplicate execution | Same request, job or webhook delivered twice |
+| Partial failure | Second write or external call fails; earlier writes roll back |
+| Authorization | Another user's or tenant's identifier is rejected |
 
 ## Output Format
 
@@ -84,9 +87,9 @@ When analyzing test coverage:
 2. Each test should verify one concept
 3. Tests should be independent — no shared mutable state between tests
 4. Avoid snapshot tests unless reviewing every change to the snapshot
-5. Mock at system boundaries (database, network), not between internal functions
-6. Every test name should read like a specification
+5. Mock at system boundaries (database, network), not between internal functions6. Every test name should read like a specification
 7. A test that never fails is as useless as a test that always fails
+8. When analyzing coverage for a review (not writing tests), follow `references/review-evidence-standard.md`: state the baseline, don't edit files, and report each test command you ran as command, outcome and limitation
 
 ## Composition
 

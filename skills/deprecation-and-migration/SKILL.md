@@ -194,6 +194,12 @@ Each step is independently deployable and reversible: if step 4 misbehaves, roll
 - **Build large indexes without blocking writes** (e.g. Postgres `CREATE INDEX CONCURRENTLY`).
 - **Decouple from code by feature flag** when the cutover is risky, exactly as in the Feature Flag Migration pattern above.
 
+**Pre-flight against existing data.** A migration that passes on an empty dev database can fail, or lock writes, on production rows. Before merging:
+- **New `NOT NULL`, unique or check constraint on a table that already has rows:** query for rows that break it first. Backfill or deduplicate, then add the constraint; where the engine supports it, add it unvalidated and validate separately (e.g. Postgres `NOT VALID` then `VALIDATE CONSTRAINT`).
+- **Column type change, or a default the engine must write into every row:** expect a table rewrite and an exclusive lock. Prefer expand/contract above; otherwise set a lock timeout so the migration fails fast instead of queueing every write behind it.
+- **Old and new app versions overlap during deploy:** the schema after this migration must work with both. If the old version breaks, split the change into expand and contract phases.
+- **No safe down path** (data dropped or transformed lossily): write down the recovery or roll-forward plan and the backup it relies on before merging.
+
 ## Zombie Code
 
 Zombie code is code that nobody owns but everybody depends on. It's not actively maintained, has no clear owner, and accumulates security vulnerabilities and compatibility issues. Signs:

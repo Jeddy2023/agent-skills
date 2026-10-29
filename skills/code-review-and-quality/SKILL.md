@@ -37,7 +37,7 @@ Does the code do what it claims to do?
 
 Can another engineer (or agent) understand this code without the author explaining it?
 
-- Are names descriptive and consistent with project conventions? (No `temp`, `data`, `result` without context)
+- Are names descriptive and consistent with project conventions? (Flag a name such as `temp`, `data` or `result` only when it is ambiguous in its local scope)
 - Is the control flow straightforward (avoid nested ternaries, deep callbacks)?
 - Is the code organized logically (related code grouped, clear module boundaries)?
 - Are there any "clever" tricks that should be simplified?
@@ -59,7 +59,7 @@ Does the change fit the system's design?
 - Is the abstraction level appropriate (not over-engineered, not too coupled)?
 - **Does this refactor reduce complexity or just relocate it?** Count the concepts a reader must hold to follow the change. If a "cleaner" version leaves that count unchanged, it isn't cleaner — prefer the restructuring that makes whole branches, modes, or layers disappear over one that re-centralizes the same logic. Prefer deleting an abstraction to polishing it.
 - **Is feature-specific logic leaking into a shared or general-purpose module?** Keep logic in its owning layer, reuse the existing canonical helper instead of a near-duplicate, and don't normalize architectural drift.
-- **Are type boundaries explicit?** Question gratuitous `any`/`unknown`/optional/casts and silent fallbacks that paper over an unclear invariant — making the boundary explicit often makes the surrounding control flow simpler.
+- **Are type boundaries explicit?** Question gratuitous `any`/optional/casts and silent fallbacks that paper over an unclear invariant — making the boundary explicit often makes the surrounding control flow simpler. `unknown` on untrusted input or caught errors, narrowed before use, is the correct boundary, not a finding.
 
 ### 4. Security
 
@@ -76,7 +76,7 @@ For detailed security guidance, see `security-and-hardening`. Does the change in
 
 ### 5. Performance
 
-For detailed profiling and optimization, see `performance-optimization`. Does the change introduce performance problems?
+For detailed profiling and optimization, see `performance-optimization`. When the change writes data, runs migrations, enqueues jobs or calls third-party services, also follow the `backend-reliability-review` skill for transactions, concurrency, retries and partial failure. Does the change introduce performance problems?
 
 - Any N+1 query patterns?
 - Any unbounded loops or unconstrained data fetching?
@@ -139,6 +139,12 @@ Every change needs a description that stands alone in version control history.
 
 ## Review Process
 
+Every step below meets the [Review Evidence Standard](../../references/review-evidence-standard.md): evidence levels, the finding contract, and what to do when something cannot be verified.
+
+### Step 0: Establish the Baseline
+
+Name exactly what is under review (PR diff, branch against its merge-base, commit range, or working tree) and state it in the report; if it is ambiguous, say so before judging scope ([how](../../references/review-evidence-standard.md#establish-the-baseline)). Read the full diff and the final state of each changed file. Review only: propose fixes, do not apply them. Report what the change introduces or worsens; label anything pre-existing as such.
+
 ### Step 1: Understand the Context
 
 Before looking at code, understand the intent:
@@ -190,6 +196,8 @@ Label every comment with its severity so the author knows what's required vs opt
 
 This prevents authors from treating all feedback as mandatory and wasting time on optional suggestions.
 
+**Calibrate severity to realistic trigger × impact,** not to how alarming the category sounds; map other scales (High/Medium/Low) with the [calibration table](../../references/review-evidence-standard.md#severity-calibration). A suspicion you cannot trace to a concrete trigger is an unresolved question, not a Critical or Required finding.
+
 **Lead with what matters.** Order findings by leverage: correctness and security first, then structural regressions and missed simplifications, then everything else. Don't bury a real issue under cosmetic nits — a few high-conviction comments beat a long list. If you have one structural problem and ten nits, the structural problem *is* the review.
 
 ### Step 5: Verify the Verification
@@ -203,6 +211,8 @@ Check the author's verification story:
 - Are there screenshots for UI changes?
 - Is there a before/after comparison?
 ```
+
+Report each check you ran as command, outcome and limitation. A check that could not run is a verification gap: say whether it blocks approval. Reading code does not prove an integration works.
 
 ## Multi-Model Review Pattern
 
@@ -339,6 +349,9 @@ For triaging `npm audit` findings and supply-chain risk (typosquatting, compromi
 - [ ] No unbounded operations
 - [ ] Pagination on list endpoints
 
+### Data & Reliability
+- [ ] Change touches persistence, migrations, jobs, webhooks or third-party calls → `backend-reliability-review` skill applied
+
 ### Verification
 - [ ] Tests pass
 - [ ] Build succeeds
@@ -376,6 +389,8 @@ For triaging `npm audit` findings and supply-chain risk (typosquatting, compromi
 - Large PRs that are "too big to review properly" (split them)
 - No regression tests with bug fix PRs
 - Review comments without severity labels — makes it unclear what's required vs optional
+- A suspicion reported as a confirmed defect, or an unchecked contract presented as correct instead of "Not verified"
+- A review with no stated baseline, or one that edits files while reviewing
 - Accepting "I'll fix it later" — it never happens
 - A refactor that moves code around without reducing the number of concepts a reader must hold
 - A change that grows an already-large file instead of decomposing it

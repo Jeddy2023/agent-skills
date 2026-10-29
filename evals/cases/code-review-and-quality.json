@@ -27,6 +27,10 @@
       {
         "prompt": "Write a failing test for the bug before fixing it",
         "owner": "test-driven-development"
+      },
+      {
+        "prompt": "Check this webhook handler for retry and duplicate delivery problems",
+        "owner": "backend-reliability-review"
       }
     ]
   },

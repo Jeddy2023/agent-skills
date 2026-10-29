@@ -17,6 +17,8 @@ In Claude Code, each call passes `subagent_type` matching the persona's `name` f
 2. **`security-auditor`** — Run a vulnerability and threat-model pass. Check OWASP Top 10, secrets handling, auth/authz, dependency CVEs. Output the standard audit report.
 3. **`test-engineer`** — Analyze test coverage for the change. Identify gaps in happy path, edge cases, error paths, and concurrency scenarios. Output the standard coverage analysis.
 
+Before spawning, establish one review baseline (PR diff, branch against its merge-base, or working tree) and pass it to every persona, together with this instruction: review only, do not modify files, and follow `references/review-evidence-standard.md` (verified defects, unresolved questions, and verification gaps kept separate; unchecked contracts marked "Not verified").
+
 In other harnesses without an Agent tool, invoke each persona's system prompt sequentially and treat their outputs as if returned in parallel — the merge phase still works.
 
 Constraints (from Claude Code's subagent model):
@@ -33,16 +35,22 @@ Once all three reports are back, the main agent (not a sub-persona) synthesizes 
 1. **Code Quality** — Aggregate Critical/Required findings from `code-reviewer` and any failing tests, lint, or build output. Resolve duplicates between reviewers.
 2. **Security** — Promote any Critical/High `security-auditor` findings to launch blockers. Cross-reference with `code-reviewer`'s security axis.
 3. **Performance** — Pull from `code-reviewer`'s performance axis; cross-check Core Web Vitals if applicable.
-4. **Accessibility** — Verify keyboard nav, screen reader support, contrast (not covered by the three personas — handle directly here, or invoke the accessibility checklist).
-5. **Infrastructure** — Env vars, migrations, monitoring, feature flags. Verify directly.
-6. **Documentation** — README, ADRs, changelog. Verify directly.
+4. **Data & reliability** — Pull the side-effect map and findings from `code-reviewer`'s `backend-reliability-review` pass (transactions, concurrency, retries, jobs, integrations). If the change touches data and that pass is missing, treat it as a verification gap.
+5. **Accessibility** — Verify keyboard nav, screen reader support, contrast (not covered by the three personas — handle directly here, or invoke the accessibility checklist).
+6. **Infrastructure** — Env vars, monitoring, feature flags, and migrations checked against the existing-data pre-flight in `deprecation-and-migration`. Verify directly.
+7. **Documentation** — README, ADRs, changelog. Verify directly.
+8. **Verification** — Merge every command the personas ran as command, outcome, and limitation; list checks nobody could run.
 
 ## Phase C — Decision and rollback
 
 Produce a single output:
 
 ```markdown
-## Ship Decision: GO | NO-GO
+## Ship Decision: GO | NO-GO | HOLD (pending verification)
+
+- Baseline: [exact range or SHA reviewed]
+- Risk level: Low | Medium | High
+- Scope reviewed: [affected behavior, endpoints, jobs, integrations]
 
 ### Blockers (must fix before ship)
 - [Source persona: Critical finding + file:line]
@@ -52,6 +60,12 @@ Produce a single output:
 
 ### Acknowledged risks (shipping anyway)
 - [Risk + mitigation]
+
+### Unresolved questions & verification gaps
+- [What could not be established, why, and whether it blocks the decision]
+
+### Readiness checklist
+- [The checklist from references/review-evidence-standard.md, each line Verified / Failed / Not verified / Not applicable]
 
 ### Rollback plan
 - Trigger conditions: [what signals would prompt rollback]
@@ -70,4 +84,5 @@ Produce a single output:
 2. Personas do not call each other. The main agent merges in Phase B.
 3. The rollback plan is mandatory before any GO decision.
 4. If any persona returns a Critical finding, the default verdict is NO-GO unless the user explicitly accepts the risk.
-5. **Skip the fan-out only if all of the following are true:** the change touches 2 files or fewer, the diff is under 50 lines, and it does not touch auth, payments, data access, or config/env. Otherwise, default to fan-out. `/ship` is designed for production-bound changes — when the blast radius is non-trivial, run the parallel review even if the diff looks small.
+5. Use HOLD, not GO, when no defect blocks the change but a verification gap does (an integration nobody could run, a migration not tested against realistic data).
+6. **Skip the fan-out only if all of the following are true:** the change touches 2 files or fewer, the diff is under 50 lines, and it does not touch auth, payments, data access, or config/env. Otherwise, default to fan-out. `/ship` is designed for production-bound changes — when the blast radius is non-trivial, run the parallel review even if the diff looks small.

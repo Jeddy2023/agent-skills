@@ -1,0 +1,86 @@
+diff --git a/src/orders/order-service.ts b/src/orders/order-service.ts
+index 3a1b2c4..7d8e9f0 100644
+--- a/src/orders/order-service.ts
++++ b/src/orders/order-service.ts
+@@ -1,6 +1,74 @@
+ import { db } from '../db';
+ import { logger } from '../logger';
++import { ShippingError } from './errors';
++
++const SHIPPING_API = process.env.SHIPPING_API_URL!;
++
++// Places an order and books its shipment with the carrier.
++export async function placeOrder(userId: string, cartId: string, couponCode?: string) {
++  return db.transaction(async (tx) => {
++    const cart = await tx.cart.findUniqueOrThrow({ where: { id: cartId, userId } });
++
++    if (couponCode) {
++      const used = await tx.couponRedemption.findFirst({
++        where: { userId, code: couponCode },
++      });
++      if (used) throw new Error('Coupon already used');
++      await tx.couponRedemption.create({ data: { userId, code: couponCode } });
++    }
++
++    const order = await tx.order.create({
++      data: { userId, totalCents: cart.totalCents, status: 'pending' },
++    });
++
++    const res = await fetch(`${SHIPPING_API}/shipments`, {
++      method: 'POST',
++      headers: { 'content-type': 'application/json' },
++      body: JSON.stringify({ reference: order.id, address: cart.address }),
++      signal: AbortSignal.timeout(5000),
++    });
++    if (!res.ok) throw new ShippingError(res.status);
++    const shipment = (await res.json()) as { id: string };
++
++    return tx.order.update({
++      where: { id: order.id },
++      data: { status: 'booked', shipmentId: shipment.id },
++    });
++  });
++}
++
++// PATCH /orders/:id: updates the delivery details of an order.
++export async function updateOrderDetails(
++  orderId: string,
++  body: { notes?: string | null; deliveryWindow?: string | null },
++) {
++  return db.order.update({
++    where: { id: orderId },
++    data: {
++      notes: body.notes ?? null,
++      deliveryWindow: body.deliveryWindow ?? null,
++    },
++  });
++}
++
++export async function cancelOrder(orderId: string) {
++  try {
++    await db.order.update({ where: { id: orderId }, data: { status: 'cancelled' } });
++  } catch (err: unknown) {
++    if (err instanceof Error && err.message.includes('Record to update not found')) {
++      throw new Error(`Order ${orderId} not found`);
++    }
++    logger.error({ err, orderId }, 'cancelOrder failed');
++    throw err;
++  }
++}
+diff --git a/prisma/schema.prisma b/prisma/schema.prisma
+index 1c2d3e4..5f6a7b8 100644
+--- a/prisma/schema.prisma
++++ b/prisma/schema.prisma
+@@ -20,3 +20,10 @@ model Order {
+   status     String
+   totalCents Int
++  shipmentId String?
++  notes      String?
++  deliveryWindow String?
+ }
++
++model CouponRedemption {
++  id     String @id @default(cuid())
++  userId String
++  code   String
++}

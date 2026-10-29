@@ -1,0 +1,55 @@
+{
+  "skill_name": "backend-reliability-review",
+  "trigger": {
+    "positive": [
+      {
+        "prompt": "Is this backend change safe to merge? It adds a payment capture endpoint",
+        "top_k": 3
+      },
+      {
+        "prompt": "Review this migration and the service that uses it before we ship",
+        "top_k": 3
+      },
+      {
+        "prompt": "Check this webhook handler for retry and duplicate delivery problems",
+        "top_k": 3
+      },
+      {
+        "prompt": "Review this diff, it writes an order and then calls the shipping API",
+        "top_k": 3
+      }
+    ],
+    "negative": [
+      {
+        "prompt": "Design the REST endpoints for invoices",
+        "owner": "api-and-interface-design"
+      },
+      {
+        "prompt": "Plan renaming a database column with zero downtime",
+        "owner": "deprecation-and-migration"
+      },
+      {
+        "prompt": "Review this React component for readability before I merge it",
+        "owner": "code-review-and-quality"
+      }
+    ]
+  },
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Review the provided diff to the order service for production readiness. Report findings; do not change any files.",
+      "expected_output": "A reliability review with a side-effect map and evidence-backed findings for the planted defects, with no false positive on the correct error handling",
+      "files": [
+        "backend-reliability-review"
+      ],
+      "expectations": [
+        "Reports the shipping API call made inside the database transaction, explaining that the external booking cannot roll back if a later step fails, with a minimal fix that moves the call outside the transaction",
+        "Reports the coupon check-then-insert as a race under concurrent requests and proposes a unique constraint on userId and code",
+        "Reports that the PATCH handler turns omitted fields into null and wipes existing notes or delivery window",
+        "Does not report the `unknown` caught error in cancelOrder as a defect",
+        "Marks the shipping provider's request and response fields as Not verified, or states that no provider documentation was available",
+        "States the review baseline and does not modify any files"
+      ]
+    }
+  ]
+}

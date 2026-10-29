@@ -5,7 +5,9 @@ disable-model-invocation: true
 
 Invoke the agent-skills:code-review-and-quality skill.
 
-Review the current changes (staged or recent commits) across all five axes:
+This is a review only: do not modify, stage, or commit files. Propose fixes inside findings.
+
+First establish the baseline and state it in the output (PR diff, branch against its merge-base, commit range, or working tree; say so if it is ambiguous). Read the full diff and the final state of each changed file. Then review across all five axes:
 
 1. **Correctness** — Does it match the spec? Edge cases handled? Tests adequate?
 2. **Readability** — Clear names? Straightforward logic? Well-organized?
@@ -13,5 +15,8 @@ Review the current changes (staged or recent commits) across all five axes:
 4. **Security** — Input validated? Secrets safe? Auth checked? (Use security-and-hardening skill)
 5. **Performance** — No N+1 queries? No unbounded ops? (Use performance-optimization skill)
 
-Categorize findings as Critical, Required, Optional, or Nit.
-Output a structured review with specific file:line references and fix recommendations.
+If the change writes to a database, alters a migration, enqueues jobs, handles webhooks, or calls a third-party service, also apply the agent-skills:backend-reliability-review skill.
+
+Categorize findings as Critical, Required, Optional, or Nit, calibrated to realistic trigger and impact.
+Follow references/review-evidence-standard.md: keep verified defects, unresolved questions, and verification gaps separate; label pre-existing problems; mark contracts you could not check against an authoritative source as "Not verified".
+Output a structured review with specific file:line references and minimal fix recommendations, and report every check you ran as command, outcome, and limitation.

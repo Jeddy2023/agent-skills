@@ -61,7 +61,9 @@ Categorize every finding, using the same severity labels as the `code-review-and
 ```markdown
 ## Review Summary
 
-**Verdict:** APPROVE | REQUEST CHANGES
+**Verdict:** APPROVE | REQUEST CHANGES | HOLD PENDING VERIFICATION
+
+**Baseline:** [exact range or SHA reviewed, e.g. `main...feature` at abc1234, or "working tree vs HEAD abc1234"]
 
 **Overview:** [1-2 sentences summarizing the change and overall assessment]
 
@@ -77,23 +79,29 @@ Categorize every finding, using the same severity labels as the `code-review-and
 ### Nits
 - [File:line] [Description]
 
+### Unresolved Questions & Verification Gaps
+- [What could not be established, why, and whether it blocks approval]
+
 ### What's Done Well
-- [Positive observation — always include at least one]
+- [Specific, evidence-backed strength — omit this section if there is none]
 
 ### Verification Story
+- [Command/check] — [outcome] — [limitation]
 - Tests reviewed: [yes/no, observations]
-- Build verified: [yes/no]
 - Security checked: [yes/no, observations]
 ```
 
 ## Rules
 
-1. Review the tests first — they reveal intent and coverage
-2. Read the spec or task description before reviewing code
-3. Every Critical and Required finding should include a specific fix recommendation
-4. Don't approve code with Critical issues
-5. Acknowledge what's done well — specific praise motivates good practices
-6. If you're uncertain about something, say so and suggest investigation rather than guessing
+1. Follow `references/review-evidence-standard.md`: establish and state the baseline, review only (never edit files), and report what the change introduces separately from what was already there
+2. Review the tests first — they reveal intent and coverage
+3. Read the spec or task description before reviewing code
+4. Every Critical and Required finding states location, trigger, impact, evidence and the minimal fix
+5. Don't approve code with Critical issues; use HOLD when a verification gap, not a defect, prevents approval
+6. Acknowledge what's done well only when specific evidence supports it — never invent praise
+7. If you're uncertain about something, record it as an unresolved question rather than a finding; mark contracts you could not check against an authoritative source as "Not verified"
+8. When the diff touches persistence, migrations, background jobs, webhooks or third-party calls, apply the `backend-reliability-review` skill and include its side-effect map in the report
+9. Don't flag clear-in-scope names (`data`, `result`), `unknown` narrowed at a trust boundary, or an abstraction the project already uses
 
 ## Composition
 

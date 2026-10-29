@@ -85,6 +85,8 @@ interface APIError {
 
 **Don't mix patterns.** If some endpoints throw, others return null, and others return `{ error }` — the consumer can't predict behavior.
 
+**Never report success you haven't delivered.** Work that is accepted but not finished returns `202` with a status resource, not `200`/`201`. An unsupported action returns an error (`400`, `405`, `501`), never a success that silently did nothing.
+
 ### 3. Validate at Boundaries
 
 Trust internal code. Validate at system edges where external input enters:
@@ -268,6 +270,16 @@ Accept partial objects — only update what's provided:
 PATCH /api/tasks/123
 { "title": "Updated title" }
 ```
+
+Define three cases per field, and test all three:
+
+| Body | Meaning |
+|---|---|
+| Field omitted | Leave unchanged |
+| `null` | Clear it, only if the field is nullable; otherwise `422` |
+| `""` or `[]` | A real value, validated like any other |
+
+Many validators and ORMs turn an omitted field into `null` (or drop explicit `null`s), silently wiping or ignoring data. Build the update from the keys actually present in the request, not from a fully parsed object with defaults.
 
 ## TypeScript Interface Patterns
 

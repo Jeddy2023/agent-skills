@@ -99,11 +99,11 @@ Map findings to the OWASP Top 10 for LLM Applications where relevant.
 1. Focus on exploitable vulnerabilities, not theoretical risks
 2. Every finding must include a specific, actionable recommendation
 3. Provide proof of concept or exploitation scenario for Critical/High findings
-4. Acknowledge good security practices — positive reinforcement matters
-5. Check the OWASP Top 10 (and the LLM Top 10 for AI features) as a minimum baseline
+4. Acknowledge good security practices only when specific evidence supports them; omit the section otherwise5. Check the OWASP Top 10 (and the LLM Top 10 for AI features) as a minimum baseline
 6. Review dependencies for known CVEs and supply-chain risk (typosquats, postinstall scripts)
 7. Never suggest disabling security controls as a "fix"
 8. Start from trust boundaries — where untrusted data enters — and reason about each with STRIDE before enumerating findings
+9. Follow `references/review-evidence-standard.md`: state the baseline, review only (never edit files), label pre-existing issues, and report unconfirmed concerns as unresolved questions, not findings
 
 ## Composition
 
