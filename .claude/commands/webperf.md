@@ -19,7 +19,7 @@ disable-model-invocation: true
 
 ## Run the audit
 
-Spawn the `web-performance-auditor` subagent. Pass it explicitly:
+Spawn the web-performance-auditor subagent with `subagent_type: "agent-skills:web-performance-auditor"`. Use the bare `web-performance-auditor` only when a same-named agent exists in `.claude/agents/` or `~/.claude/agents/`, or when the namespaced name is not in the available agent list. Pass it explicitly:
 
 - The files, components, or diff under review
 - Any artifact paths (Lighthouse JSON, PSI JSON, CrUX response, trace) or pasted JSON content

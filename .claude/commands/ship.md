@@ -11,7 +11,7 @@ Invoke the agent-skills:shipping-and-launch skill.
 
 Spawn three subagents concurrently using the Agent tool. **Issue all three Agent tool calls in a single assistant turn so they execute in parallel** — sequential calls defeat the purpose of this command.
 
-In Claude Code, each call passes `subagent_type` matching the persona's `name` field:
+In Claude Code, each call passes `subagent_type` as the plugin-namespaced name, `agent-skills:<persona>` (for example `agent-skills:code-reviewer`). Use the bare persona name only when a same-named agent exists in `.claude/agents/` or `~/.claude/agents/` (see Persona resolution below), or when the namespaced name is not in the available agent list:
 
 1. **`code-reviewer`** — Run a five-axis review (correctness, readability, architecture, security, performance) on the staged changes or recent commits. Output the standard review template.
 2. **`security-auditor`** — Run a vulnerability and threat-model pass. Check OWASP Top 10, secrets handling, auth/authz, dependency CVEs. Output the standard audit report.

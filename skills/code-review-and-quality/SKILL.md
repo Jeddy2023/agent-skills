@@ -30,6 +30,7 @@ Does the code do what it claims to do?
 - Does it match the spec or task requirements?
 - Are edge cases handled (null, empty, boundary values)?
 - Are error paths handled (not just the happy path)?
+- Is each `catch` placed where the code can act on the failure? Flag swallowed errors, blanket try/catch "for safety", and a generic user message with no logged context behind it.
 - Does it pass all tests? Are the tests actually testing the right things?
 - Are there off-by-one errors, race conditions, or state inconsistencies?
 
@@ -37,14 +38,14 @@ Does the code do what it claims to do?
 
 Can another engineer (or agent) understand this code without the author explaining it?
 
-- Are names descriptive and consistent with project conventions? (Flag a name such as `temp`, `data` or `result` only when it is ambiguous in its local scope)
+- Are names descriptive, drawn from the domain's language, and consistent with project conventions? (Flag a name such as `temp`, `data` or `result` only when it is ambiguous in its local scope)
 - Is the control flow straightforward (avoid nested ternaries, deep callbacks)?
 - Is the code organized logically (related code grouped, clear module boundaries)?
 - Are there any "clever" tricks that should be simplified?
 - **Could this be done in fewer lines?** (1000 lines where 100 suffice is a failure)
 - **Are abstractions earning their complexity?** (Don't generalize until the third use case)
 - Would comments help clarify non-obvious intent? (But don't comment obvious code.)
-- Are there dead code artifacts: no-op variables (`_unused`), backwards-compat shims, or `// removed` comments?
+- Are there dead code artifacts: no-op variables (`_unused`), backwards-compat shims, `// removed` comments, or feature flags that are fully rolled out?
 - **Is a new conditional bolted onto an unrelated flow?** That's a design smell, not a nit — push the logic into its own helper, state, or policy instead of tangling an existing path.
 - **Do repeated conditionals on the same shape appear?** They signal a missing model or dispatcher. A "temporary" branch is usually permanent debt.
 

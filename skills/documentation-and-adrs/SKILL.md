@@ -88,6 +88,10 @@ Use PostgreSQL with Prisma ORM.
 - We can use PostgreSQL's full-text search instead of adding Elasticsearch
 - Team needs PostgreSQL knowledge (standard skill, low risk)
 - Hosting on managed service (Supabase, Neon, or RDS)
+
+## Success Metric and Revisit Trigger
+- Worked if: p95 task-list query stays under 100ms at 10k tasks per team
+- Revisit if: full-text search needs ranking or facets Postgres can't serve, or write volume outgrows a single primary
 ```
 
 ### ADR Lifecycle

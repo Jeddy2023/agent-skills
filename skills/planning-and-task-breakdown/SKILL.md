@@ -31,6 +31,7 @@ Then:
 - Identify existing patterns and conventions
 - Map dependencies between components
 - Note risks and unknowns
+- For each non-obvious choice, compare 2–3 options, including "do nothing and measure", on cost, complexity, risk, reversibility and time. Pick the smallest option that solves the problem and that the team can own, and record what you are explicitly not doing
 
 **Do NOT write code during planning.** The output is a plan document saved to `tasks/plan.md` and a task list recorded in the task list target (see Output Files; default `tasks/todo.md`), not implementation.
 
@@ -177,8 +178,8 @@ When using an external tracker, note it in `tasks/plan.md` (e.g. "Tasks tracked 
 [One paragraph summary of what we're building]
 
 ## Architecture Decisions
-- [Key decision 1 and rationale]
-- [Key decision 2 and rationale]
+- [Decision — options considered, why this one, not doing, revisit if …]
+- [Decision — options considered, why this one, not doing, revisit if …]
 
 ## Task List
 

@@ -170,16 +170,20 @@ function loadOnce<T>(key: string, fetcher: () => Promise<T>): Promise<T> {
 For a shared cache, the same idea needs a distributed lock, or `stale-while-revalidate` so waiters serve the stale value instead of blocking.
 
 ### Cache checklist
-- [ ] The cached call was measured as expensive first (caching a fast call adds a hop and buys nothing)
+- [ ] The cached call was measured as expensive first, in latency, money per call, or quota (caching a fast, free call adds a hop and buys nothing)
 - [ ] Read/write ratio justifies the cache (re-read far more often than written)
-- [ ] Cache key includes every input the response varies on: tenant, viewer, locale, permissions, feature flags
+- [ ] Cache key includes every input the response varies on: tenant, viewer, locale, permissions, feature flags, and for third-party calls the region bias, language and API version
+- [ ] Free-text keys normalized (case, surrounding whitespace, Unicode form) so equivalent queries share an entry
+- [ ] Third-party terms allow storing the response, and for how long (map and places providers often limit retention of coordinates and details)
 - [ ] No per-user data cached under a key that does not identify the user
 - [ ] One invalidation strategy chosen (TTL, event/tag, or versioned keys), not an accidental mix
 - [ ] Acceptable staleness window written down, not implied by whatever TTL was typed
 - [ ] Stampede protection on hot keys (coalescing, lock, or `stale-while-revalidate`)
 - [ ] Negative results cached with a shorter TTL; origin errors never cached
+- [ ] Decided whether an expired entry may be served while the origin is failing, and for how long
 - [ ] Eviction policy and memory ceiling set (an unbounded cache is a memory leak)
 - [ ] Hit rate monitored — a cache nobody measures is an assumption, and a low hit rate is pure overhead
+- [ ] When the cache exists to cut cost, origin call volume (or spend) compared before and after, not only hit rate
 - [ ] Nothing cached whose staleness is a correctness bug (balances, permissions, inventory at checkout)
 
 ## Measurement Commands

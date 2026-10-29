@@ -66,7 +66,7 @@ If you can't name the trust boundaries for a feature, you're not ready to secure
 
 - **Never commit secrets** to version control (API keys, passwords, tokens)
 - **Never log sensitive data** (passwords, tokens, full credit card numbers)
-- **Never trust client-side validation** as a security boundary
+- **Never trust the client for anything it could fake.** Validation, prices and totals, availability and permissions are decided server-side; the client presents them and may show optimistic updates
 - **Never disable security headers** for convenience
 - **Never use `eval()` or `innerHTML`** with user-provided data
 - **Never store sessions in client-accessible storage** (localStorage for auth tokens)

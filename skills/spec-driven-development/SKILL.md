@@ -188,11 +188,12 @@ This lets you loop, retry, and problem-solve toward a clear goal rather than gue
 
 With the validated spec, generate a technical implementation plan:
 
-1. Identify the major components and their dependencies
-2. Determine the implementation order (what must be built first)
-3. Note risks and mitigation strategies
-4. Identify what can be built in parallel vs. what must be sequential
-5. Define verification checkpoints between phases
+1. Choose the approach: compare options and pick the smallest responsible one
+2. Identify the major components and their dependencies
+3. Determine the implementation order (what must be built first)
+4. Note risks and mitigation strategies
+5. Identify what can be built in parallel vs. what must be sequential
+6. Define verification checkpoints between phases
 
 > Follow `planning-and-task-breakdown` for the dependency-graph mapping and vertical-slicing mechanics behind these steps; it is the canonical source. The bullets above are a lightweight summary; if they ever diverge, `planning-and-task-breakdown` takes precedence.
 >

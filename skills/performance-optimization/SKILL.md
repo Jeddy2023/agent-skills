@@ -16,6 +16,7 @@ Measure before optimizing. Performance work without measurement is guessing — 
 - Core Web Vitals scores are below thresholds
 - You suspect a change introduced a regression
 - Building features that handle large datasets or high traffic
+- A paid or quota-limited third-party call (geocoding, maps, search, LLM) is repeated often enough that its per-call cost or quota is the problem, even when it is fast
 
 **When NOT to use:** Don't optimize before you have evidence of a problem. Premature optimization adds complexity that costs more than the performance it gains.
 
@@ -224,7 +225,7 @@ For detailed performance checklists, optimization commands, and anti-pattern ref
 | "Users won't notice 100ms" | Research shows 100ms delays impact conversion rates. Users notice more than you think. |
 | "The framework handles performance" | Frameworks prevent some issues but can't fix N+1 queries or oversized bundles. |
 | "The query is slow, add an index" | Read the plan first. The index may already exist and be unusable, and every index taxes writes forever. |
-| "Just cache it" | Caching an already-cheap call buys nothing and adds a staleness bug. Cache what is expensive *and* re-read far more than written. |
+| "Just cache it" | Caching an already-cheap call buys nothing and adds a staleness bug. Cache what is expensive *and* re-read far more than written. Expensive includes money and quota: a fast call billed per request still qualifies. |
 | "Raise the pool size, we're running out of connections" | A pool bigger than the database can serve moves the queue somewhere less visible. Find what holds connections. |
 | "It didn't help much, but it doesn't hurt" | Neutral changes are a revert. You pay maintenance on them forever and got nothing back. |
 | "We already wrote it, may as well keep it" | Sunk cost. The measurement doesn't care how long the change took to write. |
