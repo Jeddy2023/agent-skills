@@ -104,6 +104,30 @@ test('ignores non-artifact markdown references (no false positives)', () => {
   assert.match(result.stdout, /1 files checked — 0 error\(s\) — PASSED/);
 });
 
+test('accepts the per-module tasks/<module-id>/ plan and todo paths', () => {
+  const root = makeSandbox();
+  writeFile(
+    root,
+    '.claude/commands/plan.md',
+    'Save to tasks/<module-id>/plan.md and tasks/<module-id>/todo.md, or `tasks/plan.md` with no module.\n',
+  );
+
+  const result = run(root);
+
+  assert.equal(result.status, 0, result.stdout + result.stderr);
+  assert.match(result.stdout, /1 files checked — 0 error\(s\) — PASSED/);
+});
+
+test('still flags a drifted path behind an angle-bracket placeholder', () => {
+  const root = makeSandbox();
+  writeFile(root, '.claude/commands/build.md', 'Require a plan at `docs/<module-id>/plan.md`.\n');
+
+  const result = run(root);
+
+  assert.equal(result.status, 1, result.stdout + result.stderr);
+  assert.match(result.stdout, /docs\/<module-id>\/plan\.md/);
+});
+
 test('does not mistake the tail of an unrelated filename for an artifact path', () => {
   const root = makeSandbox();
   writeFile(

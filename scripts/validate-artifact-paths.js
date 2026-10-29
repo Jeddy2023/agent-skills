@@ -37,6 +37,10 @@ const ARTIFACT_ALLOWLIST = new Set([
   'docs/SPEC.md',   // spec, alternate location accepted by /build
   'tasks/plan.md',  // plan (produced by /plan, read by /build)
   'tasks/todo.md',  // task list (produced by /plan)
+  // Per-module artifacts, used when SPEC.md is a capability map with module
+  // specs under spec/ (produced by /plan <module-id>, read by /build)
+  'tasks/<module-id>/plan.md',
+  'tasks/<module-id>/todo.md',
 ]);
 
 // The files that make up the spec -> plan -> build pipeline. Absent files are
@@ -69,12 +73,13 @@ const GUARDED_FILES = [
 ];
 
 // Matches a path-like token ending in a spec/plan/todo artifact filename,
-// including an optional directory prefix with bracket placeholders like
-// docs/features/[feature-name]/spec.md. Case-insensitive so SPEC.md and a
-// drifted spec.md are both caught, then compared against the allowlist. The
-// lookbehind keeps the match from starting mid-word, so `test-plan.md` or
-// `release_todo.md` are not mistaken for a drifted `plan.md` / `todo.md`.
-const ARTIFACT_RE = /(?<![A-Za-z0-9._[\]-])(?:[A-Za-z0-9._[\]-]+\/)*(?:spec|plan|todo)\.md/gi;
+// including an optional directory prefix with bracket or angle placeholders
+// like docs/features/[feature-name]/spec.md or tasks/<module-id>/plan.md.
+// Case-insensitive so SPEC.md and a drifted spec.md are both caught, then
+// compared against the allowlist. The lookbehind keeps the match from starting
+// mid-word, so `test-plan.md` or `release_todo.md` are not mistaken for a
+// drifted `plan.md` / `todo.md`.
+const ARTIFACT_RE = /(?<![A-Za-z0-9._[\]<>-])(?:[A-Za-z0-9._[\]<>-]+\/)*(?:spec|plan|todo)\.md/gi;
 
 function findViolations(relPath) {
   const abs = path.join(ROOT, relPath);
